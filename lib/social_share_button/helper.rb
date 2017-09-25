@@ -8,7 +8,8 @@ module SocialShareButton
       html = []
       html << "<div class='social-share-button' data-title='#{h title}' data-img='#{opts[:image]}'"
       html << "data-url='#{opts[:url]}' data-desc='#{opts[:desc]}' data-via='#{opts[:via]}'>"
-
+      text_on_button = opts[:text_on_button] || false
+      
       opts[:allow_sites].each do |name|
         extra_data = opts.select { |k, _| k.to_s.start_with?('data') } if name.eql?('tumblr')
         special_data = opts.select { |k, _| k.to_s.start_with?('data-' + name) }
@@ -19,15 +20,15 @@ module SocialShareButton
         link_attributes = {
           :rel => ["nofollow", rel],
           "data-site" => name,
-          :class => "ssb-icon ssb-#{name}",
-          :title => h(link_title)
+          :class => "ssb-icon ssb-#{name}#{' ssb-text-button' if text_on_button}",
+          :title => text_on_button ? nil : h(link_title)
         }.merge(extra_data).merge(special_data)
         if name == 'copy'
           link_attributes['data-clipboard-text'] = opts[:url] || request.original_url
         else
           link_attributes[:onclick] = "return SocialShareButton.share(this);"
         end
-        html << link_to("", "javascript:void(0)", link_attributes)
+        html << link_to((text_on_button ? link_title : ""), "javascript:void(0)", link_attributes)
         
         if name == 'copy'
           html << content_tag(:div, class: 'copy-success') do
